@@ -4,11 +4,11 @@ let books = require("./booksdb.js");
 const regd_users = express.Router();
 
 const jwtSecretKey = "4cc388_t0kkan";
-console.log('in auth users ' + jwtSecretKey);
 let users = [{"username":"ilay","password":"pass"}];
 
 const isValid = (username)=>{ //returns boolean
 //write code to check is the username is valid
+  return (users[username] > 0);
 }
 
 const authenticatedUser = (username,password)=>{ //returns boolean
@@ -39,9 +39,9 @@ regd_users.post("/login", (req,res) => {
   if(authenticatedUser(username, password)){
     let accessToken = jwt.sign({data:password}, jwtSecretKey, {expiresIn: 60*60});
     req.session.authorization = {accessToken,username};
-    return res.status(200).json({message:"User successfully logged in"});
+    return res.status(200).json("User successfully logged in");
   }else{
-    return res.status(208).json({message: "Invalid Login. Check username and password"});
+    return res.status(208).json("Invalid Login. Check username and password");
   }
   
   
@@ -59,13 +59,12 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
     //check if there is a review by the user and update it
     if(books[isbn].reviews[username]){
       books[isbn].reviews[username] = new_review;
-      return res.status(200).json({message:"Book review is updated"});
     }
     else//otherwise add a new review
     {
       Object.assign( (books[isbn].reviews), {[username]:new_review});
-      return res.status(200).json({message: "Your book review is successfuly submitted"});
     }
+    return res.status(200).json("The review for the book with ISBN " + isbn + " has been added/updated");
     
   }
   else{
@@ -81,11 +80,9 @@ regd_users.delete("/auth/review/:isbn", (req, res) => {
   
   if(books[isbn].reviews[username]){
     delete books[isbn].reviews[username];
-    console.log("books[isbn].reviews[username] " + books[isbn].reviews[username] );
-    res.status(200).json({message: "Book review by " + username + " is deleted"});
+    res.status(200).json("Review for the ISBN " + isbn + " posted by the user " + username + " is now deleted");
   }else{
-    console.log("books[isbn].reviews[username] " + books[isbn].reviews[username] );
-    res.status(200).json({message: "No reviews found for the user for the ISBN provided"});
+    res.status(200).json("No reviews found for the user for the ISBN provided");
   }
 });
 
